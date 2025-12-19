@@ -1,20 +1,27 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
 
-# Run and deploy your AI Studio app
+# বাইয়িং বিডি (Buying BD) - প্রিমিয়াম বি২বি ডিজিটাল মার্কেটপ্লেস
 
-This contains everything you need to run your app locally.
+এটি একটি আধুনিক এবং সম্পূর্ণ রেসপন্সিভ বি২বি ই-কমার্স অ্যাপ্লিকেশন যা বাংলাদেশের ডিজিটাল অ্যাসেট প্রকিউরমেন্টের জন্য তৈরি করা হয়েছে।
 
-View your app in AI Studio: https://ai.studio/apps/drive/1eFidHYQC-NKuLR8OXcx63cMj8D9uMwne
+## বৈশিষ্ট্যসমূহ (Features)
+- **১০০% রেসপন্সিভ**: সব ডিভাইসে (মোবাইল, ট্যাব, ডেস্কটপ) সুন্দরভাবে কাজ করে।
+- **অ্যাডমিন প্যানেল**: লেনদেন ট্র্যাকিং, ইনভেন্টরি ম্যানেজমেন্ট এবং পার্টনার আবেদন পর্যালোচনার জন্য শক্তিশালী ড্যাশবোর্ড।
+- **AI প্রকিউরমেন্ট অ্যাডভাইজার**: গেমিনি প্রো দ্বারা চালিত এআই চ্যাটবট যা ব্যবহারকারীদের সঠিক পণ্য নির্বাচনে সাহায্য করে।
+- **ওয়াটসঅ্যাপ সাপোর্ট**: সরাসরি কন্টাক্ট করার জন্য ফ্লোটিং আইকন।
+- **সিকিউর পেমেন্ট ফ্লো**: কর্পোরেট ক্রেডিট সিস্টেম এবং ইনভয়েসিং।
 
-## Run Locally
+## কিভাবে রান করবেন (Local Setup)
+১. এই রিপোজিটরি ক্লোন করুন।
+২. আপনার এনভায়রনমেন্টে `process.env.API_KEY` সেট করুন (গেমিনি এপিআই এর জন্য)।
+৩. `index.html` ফাইলটি ব্রাউজারে ওপেন করুন।
 
-**Prerequisites:**  Node.js
+## অ্যাডমিন লগইন (Admin Credentials)
+- **ইমেইল**: `admin@buyingbd.com`
+- **পাসওয়ার্ড**: `admin123`
 
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## ডেভেলপমেন্ট
+- **Frontend**: React (ESM via esm.sh)
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Charts**: Recharts
+- **AI**: Google Gemini API
