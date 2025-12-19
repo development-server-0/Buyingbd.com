@@ -4,8 +4,12 @@
   "version": "1.0.0",
   "description": "Premium B2B Digital Marketplace for Bangladesh",
   "main": "index.html",
+  "homepage": ".",
   "scripts": {
-    "start": "npx serve ."
+    "start": "npx serve .",
+    "build": "echo 'প্রোডাকশন বিল্ড তৈরি হচ্ছে...' && rm -rf dist && mkdir dist && cp -r . dist && rm -rf dist/node_modules dist/dist && echo 'বিল্ড সফল হয়েছে! ফাইলগুলো ./dist ফোল্ডারে আছে।'",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [
     "ecommerce",
@@ -16,5 +20,8 @@
     "gemini-api"
   ],
   "author": "Buying BD",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
+  }
 }

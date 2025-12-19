@@ -10,16 +10,35 @@
 - **ওয়াটসঅ্যাপ সাপোর্ট**: সরাসরি কন্টাক্ট করার জন্য ফ্লোটিং আইকন।
 - **সিকিউর পেমেন্ট ফ্লো**: কর্পোরেট ক্রেডিট সিস্টেম এবং ইনভয়েসিং।
 
-## কিভাবে রান করবেন (Local Setup)
-১. এই রিপোজিটরি ক্লোন করুন।
-২. আপনার এনভায়রনমেন্টে `process.env.API_KEY` সেট করুন (গেমিনি এপিআই এর জন্য)।
-৩. `index.html` ফাইলটি ব্রাউজারে ওপেন করুন।
+## গিটহাব-এ পাবলিশ এবং ডেপ্লয় করার নিয়ম (Publish & Deploy to GitHub)
+
+### ১. নতুন রিপোজিটরি তৈরি
+প্রথমে গিটহাব-এ একটি নতুন পাবলিক রিপোজিটরি তৈরি করুন।
+
+### ২. গিট পুশ (Initial Push)
+আপনার টার্মিনালে নিচের কমান্ডগুলো একে একে চালান:
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+git push -u origin main
+```
+*(YOUR_USERNAME এবং YOUR_REPO_NAME এর জায়গায় আপনার তথ্য দিন)*
+
+### ৩. লাইভ ডেপ্লয়মেন্ট (Live Deployment)
+আপনার সাইটটি ইন্টারনেটে লাইভ করতে টার্মিনালে নিচের কমান্ডটি চালান:
+```bash
+npm run deploy
+```
+*দ্রষ্টব্য: এটি স্বয়ংক্রিয়ভাবে প্রয়োজনীয় টুলস ইন্সটল করবে এবং আপনার সাইটটি গিটহাব পেজেস-এ হোস্ট করবে।*
 
 ## অ্যাডমিন লগইন (Admin Credentials)
 - **ইমেইল**: `admin@buyingbd.com`
 - **পাসওয়ার্ড**: `admin123`
 
-## ডেভেলপমেন্ট
+## ডেভেলপমেন্ট টুলস
 - **Frontend**: React (ESM via esm.sh)
 - **Styling**: Tailwind CSS
 - **Icons**: Lucide React

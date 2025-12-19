@@ -124,6 +124,7 @@ export default function App() {
   const [applications, setApplications] = useState<ShopApplication[]>([]);
   const [adminTab, setAdminTab] = useState('dashboard');
   const [isNewAssetModalOpen, setIsNewAssetModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
   useEffect(() => {
     setProducts(loadFromDB(DB_KEYS.PRODUCTS) || MOCK_PRODUCTS);
@@ -194,7 +195,7 @@ export default function App() {
     };
     setApplications([newApp, ...applications]);
     setIsShopModalOpen(false);
-    alert('আবেদনটি সফলভাবে জমা হয়েছে!');
+    alert('আবেদনটি পর্যালোচনার জন্য জমা দেওয়া হয়েছে!');
   };
 
   const handleAiAsk = async () => {
@@ -258,7 +259,7 @@ export default function App() {
           <nav className="flex-grow space-y-2">
             {[
               { id: 'dashboard', icon: LayoutDashboard, label: 'সারসংক্ষেপ' },
-              { id: 'inventory', icon: Database, label: 'স্টক ম্যানেজমেন্ট' },
+              { id: 'inventory', icon: Database, label: 'ইনভেন্টরি' },
               { id: 'orders', icon: CreditCard, label: 'লেনদেন তালিকা' },
               { id: 'vendors', icon: Users, label: 'পার্টনার রিকোয়েস্ট' },
             ].map(tab => (
@@ -276,7 +277,7 @@ export default function App() {
               <ArrowUpRight className="h-4 w-4 mr-3" /> মেইন সাইট
             </button>
             <button onClick={handleLogout} className="w-full flex items-center px-4 py-3 rounded-xl text-xs font-black uppercase text-slate-500 hover:text-red-400">
-              <LogOut className="h-4 w-4 mr-3" /> লগ আউট
+              <LogOut className="h-4 w-4 mr-3" /> সাইন আউট
             </button>
           </div>
         </aside>
@@ -284,9 +285,9 @@ export default function App() {
         <main className="flex-grow p-4 md:p-12 overflow-x-hidden">
           <header className="mb-10">
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 uppercase tracking-tight">
-              {adminTab === 'dashboard' ? 'পারফরম্যান্স ড্যাশবোর্ড' : adminTab === 'inventory' ? 'প্রোডাক্ট কন্ট্রোল' : adminTab === 'orders' ? 'অর্থনৈতিক হিসাব' : 'পার্টনার ম্যানেজমেন্ট'}
+              {adminTab === 'dashboard' ? 'পারফরম্যান্স হাব' : adminTab === 'inventory' ? 'ক্যাটালগ কন্ট্রোল' : adminTab === 'orders' ? 'অর্থনৈতিক লেনদেন' : 'পার্টনার নেটওয়ার্ক'}
             </h1>
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2">সিস্টেম অ্যাডমিনিস্ট্রেশন • বাইয়িং বিডি</p>
+            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] mt-2">অ্যাডমিনিস্ট্রেশন • বাইয়িং বিডি</p>
           </header>
 
           {adminTab === 'dashboard' && (
@@ -294,9 +295,9 @@ export default function App() {
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {[
                   { label: 'মোট বিক্রয়', val: `$${orders.reduce((a, b) => a + b.total, 0).toLocaleString()}`, icon: BarChart3, trend: '+১২%', color: 'indigo' },
-                  { label: 'সক্রিয় পণ্য', val: products.length, icon: Database, trend: '+২', color: 'amber' },
+                  { label: 'সক্রিয় পণ্য', val: products.length, icon: Database, trend: '+৪', color: 'amber' },
                   { label: 'নতুন আবেদন', val: applications.filter(a => a.status === 'Pending').length, icon: Clock, trend: 'পেন্ডিং', color: 'rose' },
-                  { label: 'সার্ভিস হেলথ', val: '১০০%', icon: TrendingUp, trend: 'অনলাইন', color: 'emerald' },
+                  { label: 'সিস্টেম হেলথ', val: '১০০%', icon: TrendingUp, trend: 'অনলাইন', color: 'emerald' },
                 ].map((s, i) => (
                   <div key={i} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
                     <div className={`h-10 w-10 rounded-xl bg-${s.color}-50 text-${s.color}-600 flex items-center justify-center mb-4`}><s.icon className="h-5 w-5"/></div>
@@ -307,7 +308,7 @@ export default function App() {
               </div>
 
               <div className="bg-white p-6 md:p-10 rounded-[2.5rem] border border-slate-100 shadow-sm h-[400px]">
-                <h3 className="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-8">সাপ্তাহিক রাজস্ব চার্ট</h3>
+                <h3 className="font-black uppercase tracking-widest text-[10px] text-slate-400 mb-8">রাজস্ব রিপোর্ট (৭ দিন)</h3>
                 <ResponsiveContainer width="100%" height="80%">
                   <AreaChart data={chartData}>
                     <defs>
@@ -332,27 +333,27 @@ export default function App() {
               <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                 <h2 className="font-black uppercase tracking-widest text-sm">ইনভেন্টরি লিস্ট</h2>
                 <button onClick={() => setIsNewAssetModalOpen(true)} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase flex items-center">
-                  <Plus className="h-4 w-4 mr-2" /> নতুন অ্যাসেট
+                  <Plus className="h-4 w-4 mr-2" /> নতুন ডিজিটাল অ্যাসেট
                 </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left min-w-[600px]">
                   <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400">
                     <tr>
-                      <th className="px-6 py-4">পণ্য</th>
-                      <th className="px-6 py-4">শ্রেণী</th>
+                      <th className="px-6 py-4">পণ্যের নাম</th>
+                      <th className="px-6 py-4">ক্যাটাগরি</th>
                       <th className="px-6 py-4">রেটিং</th>
-                      <th className="px-6 py-4">ডিলিট</th>
+                      <th className="px-6 py-4">অ্যাকশন</th>
                     </tr>
                   </thead>
                   <tbody className="text-xs font-bold text-slate-700">
                     {products.map(p => (
-                      <tr key={p.id} className="border-b border-slate-50">
+                      <tr key={p.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
                         <td className="px-6 py-5 flex items-center">
                           <img src={p.image} className="h-10 w-10 rounded-xl mr-4 object-cover" />
                           <div>
                             <div className="font-black text-slate-900">{p.name}</div>
-                            <div className="text-[9px] text-slate-400 uppercase tracking-tight">সেলার: {p.vendorName}</div>
+                            <div className="text-[9px] text-slate-400 uppercase tracking-tight">ভেন্ডর: {p.vendorName}</div>
                           </div>
                         </td>
                         <td className="px-6 py-5">
@@ -376,13 +377,13 @@ export default function App() {
 
           {adminTab === 'orders' && (
             <div className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
-              <div className="p-6 border-b border-slate-100"><h2 className="font-black uppercase tracking-widest text-sm">লেনদেনের ইতিহাস</h2></div>
+              <div className="p-6 border-b border-slate-100"><h2 className="font-black uppercase tracking-widest text-sm">লেনদেন ট্র্যাকার</h2></div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left min-w-[800px]">
                   <thead className="bg-slate-50 text-[10px] font-black uppercase text-slate-400">
                     <tr>
-                      <th className="px-6 py-4">অর্ডার আইডি</th>
-                      <th className="px-6 py-4">গ্রাহক</th>
+                      <th className="px-6 py-4">আইডি</th>
+                      <th className="px-6 py-4">ক্লায়েন্ট</th>
                       <th className="px-6 py-4">মূল্য</th>
                       <th className="px-6 py-4">স্ট্যাটাস</th>
                       <th className="px-6 py-4">অ্যাকশন</th>
@@ -401,7 +402,7 @@ export default function App() {
                           <select 
                             value={o.status} 
                             onChange={(e) => updateOrderStatus(o.id, e.target.value as Order['status'])}
-                            className="bg-slate-50 text-[9px] font-black uppercase p-2 rounded-xl outline-none"
+                            className="bg-slate-50 text-[9px] font-black uppercase p-2 rounded-xl outline-none cursor-pointer"
                           >
                             <option value="Pending">পেন্ডিং</option>
                             <option value="Completed">সম্পন্ন</option>
@@ -409,7 +410,7 @@ export default function App() {
                           </select>
                         </td>
                         <td className="px-6 py-5">
-                          <button className="text-indigo-600 hover:underline flex items-center text-[10px] uppercase font-black"><Eye className="h-4 w-4 mr-1"/> ডিটেইলস</button>
+                          <button onClick={() => setSelectedOrder(o)} className="text-indigo-600 hover:underline flex items-center text-[10px] uppercase font-black"><Eye className="h-4 w-4 mr-1"/> ডিটেইলস</button>
                         </td>
                       </tr>
                     ))}
@@ -424,27 +425,30 @@ export default function App() {
               <h2 className="font-black uppercase tracking-widest text-sm">পার্টনার রিকোয়েস্ট</h2>
               {applications.length === 0 ? (
                 <div className="bg-white p-12 rounded-[2.5rem] text-center border border-dashed border-slate-200">
-                  <p className="font-black uppercase text-slate-400 text-xs">কোনো আবেদন জমা নেই</p>
+                  <p className="font-black uppercase text-slate-400 text-xs">কোনো পেন্ডিং আবেদন নেই</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {applications.map(app => (
-                    <div key={app.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm">
+                    <div key={app.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="font-black text-lg text-slate-900 mb-1">{app.shopName}</h3>
                           <div className="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-lg text-[9px] uppercase font-black inline-block">{app.businessCategory}</div>
                         </div>
-                        <div className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase ${app.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}`}>
-                          {app.status === 'Pending' ? 'পেন্ডিং' : 'অনুমোদিত'}
+                        <div className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase ${app.status === 'Approved' ? 'bg-emerald-50 text-emerald-600' : app.status === 'Rejected' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {app.status === 'Pending' ? 'পেন্ডিং' : app.status === 'Approved' ? 'অনুমোদিত' : 'প্রত্যাখ্যাত'}
                         </div>
                       </div>
-                      <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed italic">"{app.description}"</p>
+                      <p className="text-xs text-slate-500 mb-6 font-medium leading-relaxed italic border-l-4 border-slate-100 pl-4">"{app.description}"</p>
                       <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
-                         <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{app.date}</div>
+                         <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">তারিখ: {app.date}</div>
                          <div className="flex space-x-2">
                            {app.status === 'Pending' && (
-                             <button onClick={() => setApplications(applications.map(a => a.id === app.id ? {...a, status: 'Approved'} : a))} className="p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:scale-95"><Check className="h-4 w-4" /></button>
+                             <>
+                               <button onClick={() => setApplications(applications.map(a => a.id === app.id ? {...a, status: 'Approved'} : a))} className="p-3 bg-emerald-500 text-white rounded-xl hover:bg-emerald-600 active:scale-95 transition-all"><Check className="h-4 w-4" /></button>
+                               <button onClick={() => setApplications(applications.map(a => a.id === app.id ? {...a, status: 'Rejected'} : a))} className="p-3 bg-rose-500 text-white rounded-xl hover:bg-rose-600 active:scale-95 transition-all"><X className="h-4 w-4" /></button>
+                             </>
                            )}
                            <button className="p-3 bg-slate-100 text-slate-900 rounded-xl hover:bg-slate-200"><Eye className="h-4 w-4" /></button>
                          </div>
@@ -457,7 +461,48 @@ export default function App() {
           )}
         </main>
 
-        <Modal isOpen={isNewAssetModalOpen} onClose={() => setIsNewAssetModalOpen(false)} title="নতুন ডিজিটাল পণ্য যোগ করুন">
+        {/* অর্ডার ডিটেইলস মোডাল */}
+        <Modal isOpen={!!selectedOrder} onClose={() => setSelectedOrder(null)} title={`অর্ডার বিবরণ #${selectedOrder?.id}`}>
+          {selectedOrder && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">গ্রাহক</p>
+                  <p className="font-black text-sm">{selectedOrder.billingName}</p>
+                </div>
+                <div className="bg-slate-50 p-4 rounded-2xl">
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">পেমেন্ট মেথড</p>
+                  <p className="font-black text-sm">{selectedOrder.paymentMethod}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">আইটেম লিস্ট</p>
+                <div className="space-y-3">
+                  {selectedOrder.items.map((item, idx) => (
+                    <div key={idx} className="flex items-center justify-between p-3 border border-slate-100 rounded-2xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="h-10 w-10 bg-slate-100 rounded-lg overflow-hidden shrink-0">
+                          {item.image && <img src={item.image} className="w-full h-full object-cover" />}
+                        </div>
+                        <div>
+                          <p className="font-black text-xs">{item.name}</p>
+                          <p className="text-[10px] text-slate-400 uppercase">{item.variantName} x {item.quantity}</p>
+                        </div>
+                      </div>
+                      <p className="font-black text-xs">${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="pt-6 border-t border-slate-100 flex justify-between items-center">
+                 <p className="font-black uppercase text-xs tracking-widest">সর্বমোট ভ্যালু</p>
+                 <p className="font-black text-xl text-indigo-600">${selectedOrder.total.toFixed(2)}</p>
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        <Modal isOpen={isNewAssetModalOpen} onClose={() => setIsNewAssetModalOpen(false)} title="মার্কেটপ্লেসে নতুন পণ্য যোগ করুন">
           <form className="space-y-4" onSubmit={(e) => {
             e.preventDefault();
             const fd = new FormData(e.currentTarget);
@@ -467,7 +512,7 @@ export default function App() {
               description: fd.get('description') as string,
               category: 'Subscription',
               image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800',
-              variants: [{id: 'v1', name: 'অফিশিয়াল লাইসেন্স', price: Number(fd.get('price'))}],
+              variants: [{id: 'v1', name: 'ফুল লাইসেন্স', price: Number(fd.get('price'))}],
               vendorName: 'বাইয়িং বিডি ইন-হাউজ',
               rating: 5.0,
               reviewsCount: 0,
@@ -478,18 +523,18 @@ export default function App() {
             setIsNewAssetModalOpen(false);
           }}>
             <div className="space-y-1">
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">পণ্যের নাম</label>
-              <input required name="name" placeholder="নেটফ্লিক্স / অ্যাডোবি..." className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
+              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">পণ্যের শিরোনাম</label>
+              <input required name="name" placeholder="নেটফ্লিক্স প্রিমিয়াম / অ্যাডোবি সলিউশন..." className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
             </div>
             <div className="space-y-1">
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">মূল্য ($)</label>
+              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">শুরু মূল্য (USD)</label>
               <input required name="price" type="number" placeholder="প্রাইস লিখুন" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
             </div>
             <div className="space-y-1">
-              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">বিবরণ</label>
-              <textarea required name="description" placeholder="বিস্তারিত বিবরণ লিখুন..." className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm h-32" />
+              <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">বিস্তারিত বিবরণ</label>
+              <textarea required name="description" placeholder="ফিচার এবং ব্যবহারের নিয়মাবলী লিখুন..." className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm h-32" />
             </div>
-            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl">অ্যাসেট পাবলিশ করুন</button>
+            <button className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl active:scale-95 transition-all">অ্যাসেট পাবলিশ করুন</button>
           </form>
         </Modal>
       </div>
@@ -497,7 +542,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-white animate-in fade-in duration-500">
       <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 h-20 flex items-center px-4 md:px-6">
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center cursor-pointer shrink-0" onClick={() => setView(ViewState.HOME)}>
@@ -542,12 +587,12 @@ export default function App() {
           <div className="animate-in fade-in duration-700">
             <section className="bg-slate-900 py-20 md:py-32 px-6 relative overflow-hidden">
               <div className="max-w-7xl mx-auto relative z-10">
-                <span className="bg-indigo-600 text-white text-[9px] px-3 py-1.5 rounded-lg font-black uppercase mb-6 inline-block tracking-widest">B2B ডিজিটাল সলিউশনস</span>
+                <span className="bg-indigo-600 text-white text-[9px] px-3 py-1.5 rounded-lg font-black uppercase mb-6 inline-block tracking-widest">B2B ডিজিটাল ইকোসিস্টেম</span>
                 <h1 className="text-4xl md:text-6xl font-black text-white uppercase tracking-tighter mb-6 max-w-3xl leading-[0.95]">আপনার বিজনেসের জন্য <br/><span className="text-indigo-500">ডিজিটাল অ্যাসেট।</span></h1>
-                <p className="text-base md:text-lg text-slate-400 max-w-xl mb-10 font-medium leading-relaxed">সব ধরণের প্রিমিয়াম সাবস্ক্রিপশন, লাইসেন্স এবং গিফট কার্ড এখন এক জায়গায়। বাংলাদেশের বিশ্বস্ত বি২বি মার্কেটপ্লেস।</p>
+                <p className="text-base md:text-lg text-slate-400 max-w-xl mb-10 font-medium leading-relaxed">সব ধরণের প্রিমিয়াম সাবস্ক্রিপশন, লাইসেন্স এবং গিফট কার্ড এখন এক জায়গায়। বাংলাদেশের সবচেয়ে বিশ্বস্ত বি২বি মার্কেটপ্লেস।</p>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button onClick={() => setView(ViewState.CATALOG)} className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-100 transition-all shadow-xl shadow-white/5">শপ ভিজিট করুন</button>
-                  <button onClick={() => setIsShopModalOpen(true)} className="bg-white/10 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/20 transition-all backdrop-blur-lg">পার্টনার হোন</button>
+                  <button onClick={() => setView(ViewState.CATALOG)} className="bg-white text-slate-900 px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-100 transition-all shadow-xl shadow-white/5 active:scale-95">শপ ভিজিট করুন</button>
+                  <button onClick={() => setIsShopModalOpen(true)} className="bg-white/10 text-white px-8 py-4 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-white/20 transition-all backdrop-blur-lg active:scale-95">পার্টনার হোন</button>
                 </div>
               </div>
               <div className="absolute top-1/2 right-0 -translate-y-1/2 w-1/3 h-full opacity-20 pointer-events-none blur-[120px] bg-indigo-600 rounded-full"></div>
@@ -557,7 +602,7 @@ export default function App() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-12 gap-4">
                 <div className="flex items-center space-x-3">
                   <div className="h-10 w-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center"><Sparkles className="h-5 w-5" /></div>
-                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">সেরা অফারসমূহ</h2>
+                  <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">সেরা ডিলসমূহ</h2>
                 </div>
                 <button onClick={() => setView(ViewState.CATALOG)} className="text-indigo-600 font-black text-[10px] uppercase tracking-widest flex items-center group">
                   ক্যাটালগ দেখুন <ChevronRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
@@ -573,17 +618,17 @@ export default function App() {
                   <div className="flex flex-col items-start group">
                     <div className="bg-white p-4 rounded-2xl shadow-sm mb-6 group-hover:-translate-y-1 transition-transform"><Zap className="text-indigo-600 h-6 w-6" /></div>
                     <h3 className="font-black uppercase tracking-widest text-sm mb-4">তাত্ক্ষণিক ডেলিভারি</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">অর্ডার করার সাথে সাথেই আপনার ডিজিটাল কি বা কোড আপনার ইমেইল এবং পোর্টালে পাঠিয়ে দেওয়া হবে।</p>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">অর্ডার করার সাথে সাথেই আপনার ডিজিটাল লাইসেন্স কি বা কোড আপনার প্রোফাইলে এবং ইমেইলে পাঠিয়ে দেওয়া হবে।</p>
                   </div>
                   <div className="flex flex-col items-start group">
                     <div className="bg-white p-4 rounded-2xl shadow-sm mb-6 group-hover:-translate-y-1 transition-transform"><Shield className="text-indigo-600 h-6 w-6" /></div>
-                    <h3 className="font-black uppercase tracking-widest text-sm mb-4">সম্পূর্ণ নিরাপত্তা</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">প্রতিটি পণ্য সরাসরি ভেন্ডর থেকে সংগ্রহ করা এবং ১০০% ভেরিফাইড। আমরা আপনার নিরাপত্তার দায়িত্ব নিই।</p>
+                    <h3 className="font-black uppercase tracking-widest text-sm mb-4">সম্পূর্ণ গ্যারান্টি</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">প্রতিটি পণ্য সরাসরি ভেন্ডর থেকে সংগ্রহ করা এবং ১০০% ভেরিফাইড। আপনার ডিজিটাল সিকিউরিটি আমাদের অগ্রাধিকার।</p>
                   </div>
                   <div className="flex flex-col items-start group">
                     <div className="bg-white p-4 rounded-2xl shadow-sm mb-6 group-hover:-translate-y-1 transition-transform"><Briefcase className="text-indigo-600 h-6 w-6" /></div>
-                    <h3 className="font-black uppercase tracking-widest text-sm mb-4">এন্টারপ্রাইজ সাপোর্ট</h3>
-                    <p className="text-sm text-slate-500 font-medium leading-relaxed">ব্যবসায়িক প্রতিষ্ঠানের জন্য বিশেষ সুবিধা এবং ডেডিকেটেড সাপোর্ট সিস্টেম সবসময় আপনার পাশে।</p>
+                    <h3 className="font-black uppercase tracking-widest text-sm mb-4">বিজনেসের জন্য বিশেষ ছাড়</h3>
+                    <p className="text-sm text-slate-500 font-medium leading-relaxed">কর্পোরেট একাউন্টের জন্য বাল্ক অর্ডার এবং বিশেষ পেমেন্ট ফ্লেক্সিবিলিটি। আপনার টিমের গ্রোথ আমাদের লক্ষ্য।</p>
                   </div>
                </div>
             </section>
@@ -593,13 +638,13 @@ export default function App() {
         {view === ViewState.CATALOG && (
           <div className="max-w-7xl mx-auto px-6 py-20 animate-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-16">
-              <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">ডিজিটাল <br/><span className="text-indigo-600">মার্কেটপ্লেস।</span></h1>
+              <h1 className="text-4xl md:text-5xl font-black uppercase tracking-tighter leading-none">ডিজিটাল <br/><span className="text-indigo-600">ক্যাটালগ।</span></h1>
               <div className="flex flex-wrap items-center gap-3">
                  <button className="px-5 py-3 bg-slate-50 border border-slate-100 rounded-2xl flex items-center font-black uppercase text-[10px] tracking-widest text-slate-500 hover:bg-slate-100 transition-colors">
-                   <Filter className="h-3 w-3 mr-2" /> ফিল্টার
+                   <Filter className="h-3 w-3 mr-2" /> ফিল্টার করুন
                  </button>
                  <div className="text-[10px] font-black uppercase text-slate-400 bg-slate-50 px-4 py-3 rounded-2xl tracking-widest">
-                   {filteredProducts.length}টি পণ্য অনলাইনে আছে
+                   {filteredProducts.length}টি পণ্য অনলাইন
                  </div>
               </div>
             </div>
@@ -611,7 +656,7 @@ export default function App() {
               <div className="py-32 text-center bg-slate-50 rounded-[3rem] border border-dashed border-slate-200">
                 <AlertCircle className="h-12 w-12 text-slate-300 mx-auto mb-4" />
                 <p className="font-black uppercase tracking-widest text-slate-400">দুঃখিত, কোনো পণ্য পাওয়া যায়নি।</p>
-                <button onClick={() => setSearchTerm('')} className="mt-4 text-indigo-600 font-black text-[10px] uppercase underline tracking-widest">সার্চ মুছুন</button>
+                <button onClick={() => setSearchTerm('')} className="mt-4 text-indigo-600 font-black text-[10px] uppercase underline tracking-widest">সার্চ ক্লিয়ার করুন</button>
               </div>
             )}
           </div>
@@ -625,7 +670,7 @@ export default function App() {
                  {cart.map(item => (
                    <div key={`${item.productId}-${item.variantId}`} className="bg-white p-5 md:p-6 rounded-3xl border border-slate-100 flex items-center justify-between">
                      <div className="flex items-center space-x-6">
-                       <img src={item.image} className="h-14 w-14 md:h-16 md:w-16 rounded-2xl object-cover" />
+                       <img src={item.image} className="h-14 w-14 md:h-16 md:w-16 rounded-2xl object-cover shadow-sm" />
                        <div>
                          <h4 className="font-black text-slate-900 text-sm md:text-base mb-1">{item.name}</h4>
                          <p className="text-[10px] font-black uppercase text-indigo-500 tracking-widest">{item.variantName}</p>
@@ -641,16 +686,16 @@ export default function App() {
                  ))}
                  <div className="bg-slate-900 p-8 md:p-10 rounded-[2.5rem] mt-12 text-white shadow-2xl shadow-indigo-100">
                     <div className="flex justify-between items-center mb-8">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">মোট পরিশোধ্য মূল্য</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">সর্বমোট পরিশোধ্য</span>
                       <span className="text-3xl font-black text-indigo-400">${cart.reduce((a,b) => a + b.price * b.quantity, 0).toFixed(2)}</span>
                     </div>
-                    <button onClick={processOrder} className="w-full bg-indigo-600 py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-500/20 active:scale-95 transition-transform">অর্ডার সম্পন্ন করুন</button>
+                    <button onClick={processOrder} className="w-full bg-indigo-600 py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl shadow-indigo-500/20 active:scale-95 transition-transform">অর্ডার নিশ্চিত করুন</button>
                  </div>
                </div>
              ) : (
                <div className="text-center py-20 bg-slate-50 rounded-[3rem] border border-slate-100">
                  <ShoppingCart className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                 <p className="font-black uppercase tracking-widest text-slate-400">কার্ট খালি।</p>
+                 <p className="font-black uppercase tracking-widest text-slate-400">আপনার কার্টটি বর্তমানে খালি।</p>
                  <button onClick={() => setView(ViewState.CATALOG)} className="mt-4 text-indigo-600 font-black text-[10px] uppercase tracking-widest underline">মার্কেটে ফিরে যান</button>
                </div>
              )}
@@ -660,13 +705,14 @@ export default function App() {
         {view === ViewState.ORDER_SUCCESS && (
           <div className="max-w-lg mx-auto py-32 text-center px-6">
             <div className="h-20 w-20 bg-indigo-50 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-100"><Check className="h-10 w-10"/></div>
-            <h1 className="text-4xl font-black uppercase tracking-tighter mb-4">ধন্যবাদ!</h1>
-            <p className="text-slate-500 font-medium mb-10 text-sm md:text-base leading-relaxed">আপনার অর্ডারটি সফলভাবে সম্পন্ন হয়েছে। শীঘ্রই আপনার পোর্টালে পণ্যের বিস্তারিত তথ্য দেখতে পাবেন।</p>
+            <h1 className="text-4xl font-black uppercase tracking-tighter mb-4">অর্ডার সফল!</h1>
+            <p className="text-slate-500 font-medium mb-10 text-sm md:text-base leading-relaxed">আপনার লেনদেনটি সফলভাবে সম্পন্ন হয়েছে। শীঘ্রই আপনার পোর্টালে ডিজিটাল কি এবং ইনভয়েস দেখতে পাবেন।</p>
             <button onClick={() => setView(ViewState.HOME)} className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl hover:-translate-y-1 transition-transform">হোমে ফিরে যান</button>
           </div>
         )}
       </main>
 
+      {/* এআই চ্যাটবট */}
       <div className="fixed bottom-24 right-8 z-50">
          <button onClick={() => setIsAiOpen(!isAiOpen)} className="bg-slate-900 text-white h-14 w-14 rounded-full shadow-2xl flex items-center justify-center hover:scale-110 transition-transform border-4 border-white">
            {isAiOpen ? <X className="h-6 w-6" /> : <Sparkles className="h-6 w-6" />}
@@ -676,14 +722,14 @@ export default function App() {
              <div className="p-5 bg-slate-900 text-white flex items-center space-x-3">
                <div className="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center"><Sparkles className="h-4 w-4" /></div>
                <div>
-                 <span className="font-black uppercase tracking-widest text-[9px] block">এআই অ্যাডভাইজার</span>
-                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">বাইয়িং বিডি স্পেশাল</span>
+                 <span className="font-black uppercase tracking-widest text-[9px] block">স্মার্ট এআই অ্যাডভাইজার</span>
+                 <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">বাইয়িং বিডি স্পেশাল সাপোর্ট</span>
                </div>
              </div>
              <div className="flex-grow p-6 overflow-y-auto space-y-4 text-[13px] font-medium leading-relaxed bg-slate-50/30">
                {aiHistory.length === 0 && (
                  <div className="bg-white p-4 rounded-2xl border border-slate-100 text-slate-500 text-xs italic">
-                    আমি আপনাকে কীভাবে সাহায্য করতে পারি? যেকোনো পণ্যের ব্যাপারে জিজ্ঞাসা করুন।
+                    আমি আপনাকে কীভাবে সাহায্য করতে পারি? যেকোনো সফটওয়্যার বা গিফট কার্ডের বিষয়ে প্রশ্ন করুন।
                  </div>
                )}
                {aiHistory.map((h, i) => (
@@ -703,39 +749,41 @@ export default function App() {
 
       <WhatsAppFAB />
 
-      <Modal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} title="নিরাপদ প্রবেশ">
+      {/* মোডালসমূহ */}
+      <Modal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} title="নিরাপদ প্রবেশপথ">
         <form className="space-y-4" onSubmit={handleLogin}>
           <div className="space-y-1">
-            <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">ইউজার ইমেইল</label>
-            <input name="email" type="email" required placeholder="আপনার ইমেইল" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
+            <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">ইউজার ইমেইল / কর্পোরেট আইডি</label>
+            <input name="email" type="email" required placeholder="আপনার ইমেইল" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm focus:border-indigo-200 transition-colors" />
           </div>
           <div className="space-y-1">
-            <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">পাসওয়ার্ড</label>
-            <input name="password" type="password" required placeholder="••••••••" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
+            <label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">সিক্রেট পাসওয়ার্ড</label>
+            <input name="password" type="password" required placeholder="••••••••" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm focus:border-indigo-200 transition-colors" />
           </div>
           <div className="pt-4">
-            <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl">লগইন করুন</button>
-            <p className="mt-6 text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest">নিরাপদ এন্টারপ্রাইজ প্রোটোকল দ্বারা চালিত</p>
+            <button className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-xs tracking-widest shadow-xl active:scale-95 transition-all">লগইন করুন</button>
+            <p className="mt-6 text-[10px] font-bold text-slate-400 text-center uppercase tracking-widest leading-loose">নিরাপদ এন্টারপ্রাইজ প্রোটোকল দ্বারা এনক্রিপ্টেড। রুট এক্সেসের জন্য সিস্টেম অ্যাডমিনের সাথে যোগাযোগ করুন।</p>
           </div>
         </form>
       </Modal>
 
-      <Modal isOpen={isShopModalOpen} onClose={() => setIsShopModalOpen(false)} title="ভেন্ডর হিসেবে যোগ দিন">
+      <Modal isOpen={isShopModalOpen} onClose={() => setIsShopModalOpen(false)} title="ভেন্ডর হিসেবে পার্টনারশিপ আবেদন">
         <form className="space-y-4" onSubmit={submitVendorApp}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-             <input required name="fullName" placeholder="পূর্ণ নাম" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
-             <input required name="email" type="email" placeholder="ইমেইল" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
+             <input required name="fullName" placeholder="পূর্ণ আইনি নাম" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
+             <input required name="email" type="email" placeholder="অফিশিয়াল ইমেইল" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
              <input required name="shopName" placeholder="প্রতিষ্ঠানের নাম" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm" />
-             <select name="category" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm">
+             <select name="category" className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm cursor-pointer">
                <option>SaaS প্রোভাইডার</option>
                <option>সফটওয়্যার এজেন্সি</option>
                <option>গিফট কার্ড ডিলার</option>
+               <option>অন্যান্য</option>
              </select>
           </div>
-          <textarea required name="description" placeholder="আপনার ব্যবসা সম্পর্কে লিখুন..." className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm h-32" />
-          <button className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl">আবেদন পাঠান</button>
+          <textarea required name="description" placeholder="আপনার ব্যবসা এবং পণ্যের উৎস সম্পর্কে সংক্ষেপে লিখুন..." className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none font-bold text-sm h-32" />
+          <button className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl active:scale-95 transition-all">আবেদন জমা দিন</button>
         </form>
       </Modal>
 
@@ -746,37 +794,43 @@ export default function App() {
                 <img src={LOGO_SRC} className="h-8 w-8 mr-2 grayscale brightness-200" />
                 <span className="text-white font-black text-xl tracking-tighter">বাইয়িংবিডি</span>
               </div>
-              <p className="max-w-sm text-sm font-medium leading-relaxed">বাংলাদেশের সেরা বি২বি ডিজিটাল মার্কেটপ্লেস। আমরা আপনার ব্যবসার প্রয়োজনীয় সব ডিজিটাল অ্যাসেট পৌঁছে দিতে কাজ করছি।</p>
+              <p className="max-w-sm text-sm font-medium leading-relaxed">বাংলাদেশের প্রগতিশীল এন্টারপ্রাইজ সমূহের জন্য নির্ভরযোগ্য ডিজিটাল অ্যাসেট প্রকিউরমেন্ট পোর্টাল। সরাসরি ভেন্ডর এক্সেস এবং সিকিউর ডেলিভারি আমাদের মূল প্রতিশ্রুতি।</p>
               <div className="mt-8 flex items-center space-x-6">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-1">সাপোর্ট লাইন</span>
-                  <a href="tel:+8801338353169" className="text-white font-black text-xs">+৮৮০ ১৩৩৮-৩৫৩১৬৯</a>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-1">অফিশিয়াল সাপোর্ট</span>
+                  <a href="tel:+8801338353169" className="text-white font-black text-xs hover:text-indigo-400 transition-colors">+৮৮০ ১৩৩৮-৩৫৩১৬৯</a>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 mb-1">হেড কোয়ার্টার</span>
+                  <span className="text-white font-black text-xs">ঢাকা, বাংলাদেশ</span>
                 </div>
               </div>
            </div>
            <div>
-              <h5 className="text-white font-black uppercase text-[10px] tracking-widest mb-6">লিঙ্কসমূহ</h5>
+              <h5 className="text-white font-black uppercase text-[10px] tracking-widest mb-6">কুইক লিঙ্ক</h5>
               <ul className="space-y-4 text-xs font-bold">
-                 <li><button onClick={() => setView(ViewState.CATALOG)} className="hover:text-indigo-400">ডিজিটাল ক্যাটালগ</button></li>
-                 <li><button onClick={() => setIsShopModalOpen(true)} className="hover:text-indigo-400">ভেন্ডর হাব</button></li>
-                 <li><button onClick={() => setIsLoginModalOpen(true)} className="hover:text-indigo-400">লগইন</button></li>
+                 <li><button onClick={() => setView(ViewState.CATALOG)} className="hover:text-indigo-400 transition-colors">ডিজিটাল মার্কেট</button></li>
+                 <li><button onClick={() => setIsShopModalOpen(true)} className="hover:text-indigo-400 transition-colors">ভেন্ডর হাব</button></li>
+                 <li><button onClick={() => setIsLoginModalOpen(true)} className="hover:text-indigo-400 transition-colors">লগইন করুন</button></li>
+                 <li><button onClick={() => setView(ViewState.HOME)} className="hover:text-indigo-400 transition-colors">হোম পেজ</button></li>
               </ul>
            </div>
            <div>
-              <h5 className="text-white font-black uppercase text-[10px] tracking-widest mb-6">পলিসি</h5>
+              <h5 className="text-white font-black uppercase text-[10px] tracking-widest mb-6">আইনি নীতিমালা</h5>
               <ul className="space-y-4 text-xs font-bold">
-                 <li>টার্মস ও কন্ডিশন</li>
-                 <li>প্রাইভেসি পলিসি</li>
-                 <li>রিফান্ড পলিসি</li>
+                 <li className="hover:text-indigo-400 cursor-pointer transition-colors">শর্তাবলী ও নিয়মাবলী</li>
+                 <li className="hover:text-indigo-400 cursor-pointer transition-colors">গোপনীয়তা সুরক্ষা</li>
+                 <li className="hover:text-indigo-400 cursor-pointer transition-colors">রিফান্ড ও চার্জব্যাক</li>
+                 <li className="hover:text-indigo-400 cursor-pointer transition-colors">ভেন্ডর কোড অফ কন্ডাক্ট</li>
               </ul>
            </div>
         </div>
         <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4 text-[10px] font-black uppercase tracking-widest">
            <span>© ২০২৪ বাইয়িং বিডি এন্টারপ্রাইজ • কপিরাইট সংরক্ষিত</span>
-           <div className="flex items-center space-x-6 text-indigo-500">
-             <span>সিকিউর</span>
-             <span>|</span>
-             <span>তাৎক্ষণিক ডেলিভারি</span>
+           <div className="flex items-center space-x-6">
+             <span className="text-indigo-500">সিকিউর গেটওয়ে</span>
+             <span className="text-slate-700">|</span>
+             <span className="text-indigo-500">তাত্ক্ষণিক ডেলিভারি সিস্টেম</span>
            </div>
         </div>
       </footer>
