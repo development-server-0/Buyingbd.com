@@ -1,0 +1,18 @@
+
+{
+  "name": "Buying BD - B2B Digital Marketplace",
+  "short_name": "Buying BD",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "description": "Premium B2B Digital Marketplace for Bangladesh",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/VWV0pWp/buying-bd-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
